@@ -15,6 +15,7 @@ def shop(money, stones):
 	if(int(b) == 1 and money > 119):
 		ib = random.randrange(0, 2)
 		stones[ib] += 1
+		money -= 120
 	else:
 		print("Error or not enough shards")
 		input()
@@ -22,7 +23,7 @@ def shop(money, stones):
 	items = [money, stones]
 	return items 
 
-def inv(stones, maxhp, defense, atk):
+def inv(stones, maxhp, defense, atk, items, hp):
 	print("0) Back")
 	print("----------" + Fore.CYAN + "Inventory" + Fore.RESET + "----------")
 	if(stones[0] != 0):	
@@ -31,6 +32,10 @@ def inv(stones, maxhp, defense, atk):
 		print("2)    Sun stones: " + str(stones[1]))
 	if(stones[2] != 0):	
 		print("3)    Air stones: " + str(stones[2]))
+	if(items[0] != 0):
+		print("4)    Bones: " + str(items[0]))
+	if(items[1] != 0):
+		print("5)    Meat: " + str(items[1]))
 	print("------------------------------")
 	b = input()
 	if(int(b) == 0):
@@ -44,9 +49,12 @@ def inv(stones, maxhp, defense, atk):
 	elif(int(b) == 3 and stones[2] > 0):
 		defense += 1
 		stones[2] -= 1
+	elif(int(b) == 5 and items[1] > 0):
+		items[1] -= 1
+		hp += 5
 	else:
-		inv(stones, maxhp, defense, atk)
-	items = [maxhp, atk, defense, stones]
+		inv(stones, maxhp, defense, atk, items)
+	items = [maxhp, atk, defense, stones, items, hp]
 	return items
 
 def Workshop(shards, stones):

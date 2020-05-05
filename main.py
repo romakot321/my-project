@@ -10,10 +10,13 @@ maxhp = 100
 spwnId = -2
 defense = 5
 atk = 10
+xp = 0
+lvl = 1
 i = 0 # счетчик
 money = 0
 currMob = []
-dropList = [["Bone",5,30], ["Meat",2,50], ["Exp",210, 20]] # [dropId,maxCount, dropChance]
+items = [0,0] # Bone, Meat
+dropList = [["Bone",5,30], ["Meat",2,50], ["Exp", 10, 20]] # [dropId,maxCount, dropChance]
 monstersList = [["Small", 3, 50], ["Big", 3, 10], ["Strong", 3, 30], ["Fast", 3, 10]] # monsterName[maxLvl, rateSpawn]
 shards = [0, 0, 0] # water, sun, air
 stones = [0, 0, 0] # ^^^^^^^^^^^^^^^
@@ -47,10 +50,10 @@ def eventHandler(event):
 	elif(event[0] == "upRateSpawn"):
 		monstersList[0][2] += 20
 	elif(event[0] == "upLvlMonsters"):
-		monstersList[0][1] += 3
-		monstersList[1][1] += 1
+		monstersList[0][1] += 2
+		monstersList[1][1] += 2
 		monstersList[2][1] += 2
-		monstersList[3][1] += 3
+		monstersList[3][1] += 2
 	elif(event[0] == "downHP"):
 		hp -= 10
 	elif(event[0] == "downDef"):
@@ -171,11 +174,16 @@ def attackMob(num, atk):
 				shards[2] += random.randrange(1,3)
 			buffMoney = mobsInChank[num][2] * 3
 			money += random.randrange(1, ( 50 + buffMoney ))
+			items[0] += random.randrange(0, dropList[0][1])
+			items[1] += random.randrange(0, dropList[1][1])
+			xp += random.randrange(0, dropList[2][1])
 			del mobsInChank[num]
 			break
 		hp -= currMob[0][1]
 		print("- " + str(currMob[0][1]) + " hp to you.")
 		print("You hp is: " + str(hp))
+		if(hp < 1):
+			break
 	currMob.clear()
 
 eventHandler(event)
@@ -203,11 +211,16 @@ def main():
 			print("    Sun stones: " + str(stones[1]))
 		if(stones[2] != 0):	
 			print("    Air stones: " + str(stones[2]))
+		if(items[0] != 0):
+			print("    Bones: " + str(items[0]))
+		if(items[1] != 0):
+			print("    Meat: " + str(items[1]))
 		print("    Money: " + Fore.YELLOW + str(money))
 		print("----------" + Fore.CYAN + "Your stats" + Fore.RESET + "----------")
 		print("    HP: " + Fore.RED + str(hp) + Fore.RESET + "/" + Fore.RED + str(maxhp))
 		print("    Defense: " + Fore.WHITE + Style.DIM + str(defense))
 		print("    Strength: " + Fore.BLUE + str(atk))
+		print("    Exp: " + Fore.GREEN + str(xp) + Fore.RESET + "/" + Fore.GREEN + "100" + Fore.RESET + "; Lvl: " + Fore.MAGENTA + str(lvl))
 		print("-----------" + Fore.CYAN + "Monsters" + Fore.RESET + "-----------")
 		for a in range(0, len(mobsInChank)):
 			print(str(a) + ") Monster: " + str(mobsInChank[a][1]) + ", Lvl: " + str(mobsInChank[a][2]))
@@ -235,11 +248,13 @@ def main():
 			shards = newItem[1]
 			stones = newItem[0]
 		elif(int(b) == 4):
-			newItem = shop.inv(stones, maxhp, defense, atk)
+			newItem = shop.inv(stones, maxhp, defense, atk, items, hp)
 			maxhp = newItem[0]
 			atk = newItem[1]
 			defense = newItem[2]
 			stones = newItem[3]
+			items = newItem[4]
+			hp = newItem[5]
 		elif(int(b) == 5):
 			newItem = shop.shop(money, stones)
 			money = newItem[0]
