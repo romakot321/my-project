@@ -201,6 +201,8 @@ def main():
 		if(xp > 99):
 			lvl += 1
 			xp -= 100
+			atk += 3
+			defense += 1
 		print("------------" + Fore.CYAN + "Items" + Fore.RESET + "-------------")
 		if(shards[0] != 0):	
 			print("    Water shards: " + str(shards[0]))
@@ -259,9 +261,10 @@ def main():
 			items = newItem[4]
 			hp = newItem[5]
 		elif(int(b) == 5):
-			newItem = shop.shop(money, stones)
+			newItem = shop.shop(money, stones, items)
 			money = newItem[0]
 			stones = newItem[1]
+			items = newItem[2]
 		else:
 			main()
 main()
