@@ -2,9 +2,11 @@ import getEvent
 import random
 import shop
 import os
+from colorama import Fore, init, Style
 
 mob = []
 hp = 100
+maxhp = 100
 spwnId = -2
 defense = 5
 atk = 10
@@ -13,7 +15,7 @@ money = 0
 currMob = []
 dropList = [["Bone",5,30], ["Meat",2,50], ["Exp",210, 20]] # [dropId,maxCount, dropChance]
 monstersList = [["Small", 3, 50], ["Big", 3, 10], ["Strong", 3, 30], ["Fast", 3, 10]] # monsterName[maxLvl, rateSpawn]
-shards = [11, 0, 0] # water, sun, air
+shards = [0, 0, 0] # water, sun, air
 stones = [0, 0, 0] # ^^^^^^^^^^^^^^^
 eventList = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 eventList = ["upHP", "upDef", "upAtk"
@@ -30,7 +32,7 @@ citesList = [["One", 134, 20], ["Two", 20, 1]] # City name, x, y
 weather = getEvent.getWeather()
 event = getEvent.setEvent()
 
-print("Event today: " + str(eventList[event[0]]))
+init(autoreset=True)
 
 def eventHandler(event):
 	global hp, defense, atk, dropList, monstersList
@@ -181,9 +183,12 @@ spawnInChunk()
 
 while hp > 0:
 	os.system('cls')
+	print("Event today: " + str(eventList[event[0]]))
 	if(mobsInChank == []):
 		spawnInChunk()
-	print("------------Items-------------")
+	if(hp > maxhp):
+		hp = maxhp
+	print("------------" + Fore.CYAN + "Items" + Fore.RESET + "-------------")
 	if(shards[0] != 0):	
 		print("    Water shards: " + str(shards[0]))
 	if(shards[1] != 0):	
@@ -196,18 +201,20 @@ while hp > 0:
 		print("    Sun stones: " + str(stones[1]))
 	if(stones[2] != 0):	
 		print("    Air stones: " + str(stones[2]))
-	print("    Money: " + str(money))
-	print("----------Your stats----------")
-	print("    HP: " + str(hp))
-	print("    def: " + str(defense))
-	print("    atk: " + str(atk))
-	print("-----------Monsters-----------")
+	print("    Money: " + Fore.YELLOW + str(money))
+	print("----------" + Fore.CYAN + "Your stats" + Fore.RESET + "----------")
+	print("    HP: " + Fore.RED + str(hp) + Fore.RESET + "/" + Fore.RED + str(maxhp))
+	print("    Defense: " + Fore.WHITE + Style.DIM + str(defense))
+	print("    Strength: " + Fore.BLUE + str(atk))
+	print("-----------" + Fore.CYAN + "Monsters" + Fore.RESET + "-----------")
 	for a in range(0, len(mobsInChank)):
 		print(str(a) + ") Monster: " + str(mobsInChank[a][1]) + ", Lvl: " + str(mobsInChank[a][2]))
 	print("------------------------------")
 	print("1) Attack")
-	print("2) Heal(15 money)")
+	print("2) Heal 50 HP(15 money)")
 	print("3) Workshop")
+	print("4) Open inventory")
+	print("5) Shop")
 	b = input()
 	if(int(b) == 1):
 		print("Enter number of monster: ")
@@ -218,8 +225,18 @@ while hp > 0:
 			attackMob(int(c), atk)
 	if(int(b) == 2 and money > 14):
 		money -= 15
-		hp = 100
+		hp += 50
 	if(int(b) == 3):
 		newItem = shop.Workshop(shards, stones)
 		shards = newItem[1]
 		stones = newItem[0]
+	if(int(b) == 4):
+		newItem = shop.inv(stones, maxhp, defense, atk)
+		maxhp = newItem[0]
+		atk = newItem[1]
+		defense = newItem[2]
+		stones = newItem[3]
+	if(int(b) == 5):
+		newItem = shop.shop(money, stones)
+		money = newItem[0]
+		stones = newItem[1]
