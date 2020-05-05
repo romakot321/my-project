@@ -11,7 +11,7 @@ def shop(money, stones):
 	print("------------------------------")
 	b = input()
 	if(int(b) == 0):
-		break
+		pass
 	if(int(b) == 1 and money > 119):
 		ib = random.randrange(0, 2)
 		stones[ib] += 1
@@ -23,6 +23,7 @@ def shop(money, stones):
 	return items 
 
 def inv(stones, maxhp, defense, atk):
+	print("0) Back")
 	print("----------" + Fore.CYAN + "Inventory" + Fore.RESET + "----------")
 	if(stones[0] != 0):	
 		print("1)    Water stones: " + str(stones[0]))
@@ -32,6 +33,8 @@ def inv(stones, maxhp, defense, atk):
 		print("3)    Air stones: " + str(stones[2]))
 	print("------------------------------")
 	b = input()
+	if(int(b) == 0):
+		pass
 	if(int(b) == 1 and stones[0] > 0):
 		maxhp += 5
 		stones[0] -= 1
@@ -54,6 +57,8 @@ def Workshop(shards, stones):
 	print("3) Craft a air stone(30 shards)")
 	print("------------------------------")
 	a = input()
+	if(int(a) == 0):
+		pass
 	if(int(a) == 1 and shards[0] > 29):
 		stones[0] += 1
 		shards[0] -= 30

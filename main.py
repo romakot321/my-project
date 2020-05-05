@@ -181,7 +181,7 @@ def attackMob(num, atk):
 eventHandler(event)
 spawnInChunk()
 def main():
-	global hp, maxhp, atk, defense, monstersInfo, monstersList
+	global hp, maxhp, atk, defense, monstersInfo, monstersList, shards, stones, money
 	while hp > 0:
 		os.system('cls')
 		os.system('clear')
@@ -218,6 +218,8 @@ def main():
 		print("4) Open inventory")
 		print("5) Shop")
 		b = input()
+		if(b == ""):
+			main()
 		if(int(b) == 1):
 			print("Enter number of monster: ")
 			c = input()
