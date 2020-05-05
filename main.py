@@ -153,7 +153,7 @@ def infoMob(num):
 			mob[2] += 28
 		return mob
 def attackMob(num, atk):
-	global currMob, hp, shards, money
+	global currMob, hp, shards, money, xp, items
 	print("You attack a " + str(mobsInChank[num][1] + " Monster"))
 	currMob.append(infoMob(num))
 	hpE = currMob[0][2]
@@ -189,7 +189,7 @@ def attackMob(num, atk):
 eventHandler(event)
 spawnInChunk()
 def main():
-	global hp, maxhp, atk, defense, monstersInfo, monstersList, shards, stones, money
+	global hp, maxhp, atk, defense, monstersInfo, monstersList, shards, stones, money, items, xp, lvl
 	while hp > 0:
 		os.system('cls')
 		os.system('clear')
@@ -198,6 +198,9 @@ def main():
 			spawnInChunk()
 		if(hp > maxhp):
 			hp = maxhp
+		if(xp > 99):
+			lvl += 1
+			xp -= 100
 		print("------------" + Fore.CYAN + "Items" + Fore.RESET + "-------------")
 		if(shards[0] != 0):	
 			print("    Water shards: " + str(shards[0]))
