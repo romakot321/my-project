@@ -235,6 +235,7 @@ def main():
 		print("3) Workshop")
 		print("4) Open inventory")
 		print("5) Shop")
+		print("6) Save")
 		b = input()
 		if(b == ""):
 			main()
@@ -265,6 +266,67 @@ def main():
 			money = newItem[0]
 			stones = newItem[1]
 			items = newItem[2]
+		elif(int(b) == 6):
+			f = open('save.txt', 'tw', encoding='utf-8')
+			f.write(str(hp) + '\n')
+			f.write(str(maxhp) + '\n')
+			f.write(str(defense) + '\n')
+			f.write(str(atk) + '\n')
+			f.write(str(xp) + '\n')
+			f.write(str(lvl) + '\n')
+			f.write(str(money) + '\n')
+			f.close()
+			f = open('savem.txt', 'tw', encoding='utf-8')
+			for x in range(0, len(items)): f.write(str(items[x]) + '\n')
+			for x in range(0, len(shards)): f.write(str(shards[x]) + '\n')
+			for x in range(0, len(stones)): f.write(str(stones[x]) + '\n')
+			f.close()
 		else:
 			main()
-main()
+print("1. Load save")
+print("2. New game")
+b = input()
+if(int(b) == 1):
+	f = open('save.txt')
+	i = 0
+	for line in f:
+		i += 1
+		if(i == 1):
+			hp = int(line)
+		if(i == 2):
+			maxhp = int(line)
+		if(i == 3):
+			defense = int(line)
+		if(i == 4):
+			atk = int(line)
+		if(i == 5):
+			xp = int(line)
+		if(i == 6):
+			lvl = int(line)
+		if(i == 7):
+			money = int(line)
+	f.close()
+	f = open('savem.txt')
+	i = 0
+	for line in f:
+		i += 1
+		if(i == 1):
+			items[0] = int(line)
+		if(i == 2):
+			items[1] = int(line)
+		if(i == 3):
+			shards[0] = int(line)
+		if(i == 4):
+			shards[1] = int(line)
+		if(i == 5):
+			shards[2] = int(line)
+		if(i == 6):
+			stones[0] = int(line)
+		if(i == 7):
+			stones[1] = int(line)
+		if(i == 8):
+			stones[2] = int(line)
+	f.close()
+	main()
+if(int(b) == 2):
+	main()
