@@ -5,16 +5,20 @@ import random
 init(autoreset=True)
 
 def shop(money, stones):
+	print("0) Back")
 	print("-------------" + Fore.CYAN + "Shop" + Fore.RESET + "-------------")
 	print("1) Buy random stone(120 coins)")
 	print("------------------------------")
 	b = input()
+	if(int(b) == 0):
+		break
 	if(int(b) == 1 and money > 119):
 		ib = random.randrange(0, 2)
 		stones[ib] += 1
 	else:
 		print("Error or not enough shards")
 		input()
+		shop(money, stones)
 	items = [money, stones]
 	return items 
 
@@ -37,6 +41,8 @@ def inv(stones, maxhp, defense, atk):
 	elif(int(b) == 3 and stones[2] > 0):
 		defense += 1
 		stones[2] -= 1
+	else:
+		inv(stones, maxhp, defense, atk)
 	items = [maxhp, atk, defense, stones]
 	return items
 
@@ -60,5 +66,6 @@ def Workshop(shards, stones):
 	else:
 		print("Error or not enough shards")
 		input()
+		Workshop(shards, stones)
 	items = [stones, shards]
 	return items
