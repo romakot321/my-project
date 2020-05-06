@@ -4,6 +4,7 @@ import shop
 import os
 from colorama import Fore, init, Style
 
+showItems = True
 mob = []
 hp = 100
 maxhp = 100
@@ -12,10 +13,12 @@ defense = 5
 atk = 10
 xp = 0
 lvl = 1
+waves = 0
 i = 0 # счетчик
 money = 0
+buffs = [0,0,0] # atk, def, maxhp
 currMob = []
-items = [0,0] # Bone, Meat
+items = [[0,0], [-1, -1]] # drop[Bone, Meat], equipment[swordId, shieldId]
 dropList = [["Bone",5,30], ["Meat",2,50], ["Exp", 10, 20]] # [dropId,maxCount, dropChance]
 monstersList = [["Small", 3, 50], ["Big", 3, 10], ["Strong", 3, 30], ["Fast", 3, 10]] # monsterName[maxLvl, rateSpawn]
 shards = [0, 0, 0] # water, sun, air
@@ -26,7 +29,7 @@ eventList = ["upHP", "upDef", "upAtk"
 			 "downHp", "downDef", "downAtk",
 			 "downDrop", "downRateSpawn", "downLvlMonsters",
 			 "maxMobInChunk+", "maxMobInChunk-"]
-monstersInfo = [[0, 4, 20, 1, 3], [1, 5, 35, 3, 1], [2, 7, 27, 2, 2], [3, 3, 22, 1, 5]] # SpawnId, atk, hp, def, speed
+monstersInfo = [[0, 4, 20, 1, 2], [1, 5, 35, 3, 1], [2, 7, 27, 2, 2], [3, 3, 22, 1, 5]] # SpawnId, atk, hp, def, speed
 				# Small			   Big				Strong			  Fast				
 mobsInChank = [] # SpawnId, lvl
 maxMobInChunk = 5
@@ -40,11 +43,11 @@ init(autoreset=True)
 def eventHandler(event):
 	global hp, defense, atk, dropList, monstersList
 	if(event[0] == "upHP"):
-		hp += 10
+		buffs[2] += 10
 	elif(event[0] == "upDef"):
-		defense += 3
+		buffs[1] += 3
 	elif(event[0] == "upAtk"):
-		atk += 5
+		buffs[0] += 5
 	elif(event[0] == "upDrop"):
 		dropList[2][1] += 10
 	elif(event[0] == "upRateSpawn"):
@@ -55,13 +58,13 @@ def eventHandler(event):
 		monstersList[2][1] += 2
 		monstersList[3][1] += 2
 	elif(event[0] == "downHP"):
-		hp -= 10
+		buffs[2] -= 10
 	elif(event[0] == "downDef"):
-		defense -= 2
+		buffs[1] -= 2
 	elif(event[0] == "downAtk"):
-		atk -= 3
+		buffs[0] -= 3
 	elif(event[0] == "downDrop"):
-		dropList[2][1] -= 3
+		dropList[1][1] -= 1
 	elif(event[0] == "downRateSpawn"):
 		monstersList[0][2] -= 15
 	else:
@@ -80,7 +83,8 @@ def mobSpawn():
 		spwnId = -1
 	return spwnId
 def spawnInChunk():
-	global spwnId
+	global spwnId, waves
+	waves += 1
 	i = 0
 	mobsInChank.clear()
 	for i in range(0, maxMobInChunk):
@@ -158,7 +162,7 @@ def attackMob(num, atk):
 	currMob.append(infoMob(num))
 	hpE = currMob[0][2]
 	while hpE > 0 or hp > 0:
-		if(random.randrange(0,10) > currMob[0][4]):
+		if( ( random.randrange(0,10) + 1 ) > currMob[0][4]):
 			dmg = atk - random.randrange(0, currMob[0][3])
 			hpE -= dmg
 			print("- " + str(dmg) + " hp to monster.")
@@ -174,8 +178,8 @@ def attackMob(num, atk):
 				shards[2] += random.randrange(1,3)
 			buffMoney = mobsInChank[num][2] * 3
 			money += random.randrange(1, ( 50 + buffMoney ))
-			items[0] += random.randrange(0, dropList[0][1])
-			items[1] += random.randrange(0, dropList[1][1])
+			items[0][0] += random.randrange(0, dropList[0][1])
+			items[0][1] += random.randrange(0, dropList[1][1])
 			xp += random.randrange(0, dropList[2][1])
 			del mobsInChank[num]
 			break
@@ -185,12 +189,102 @@ def attackMob(num, atk):
 		if(hp < 1):
 			break
 	currMob.clear()
+def menu():
+	global showItems
+	print("1. Load save")
+	print("2. New game")
+	print("3. Settings")
+	b = input()
+	if(int(b) == 1):
+		f = open('save.txt')
+		i = 0
+		for line in f:
+			i += 1
+			if(i == 1):
+				hp = int(line)
+			if(i == 2):
+				maxhp = int(line)
+			if(i == 3):
+				defense = int(line)
+			if(i == 4):
+				atk = int(line)
+			if(i == 5):
+				xp = int(line)
+			if(i == 6):
+				lvl = int(line)
+			if(i == 7):
+				money = int(line)
+			if(i == 8):
+				waves = int(line)
+		f.close()
+		f = open('savem.txt')
+		i = 0
+		for line in f:
+			i += 1
+			if(i == 1):
+				items[0][0] = int(line)
+			if(i == 2):
+				items[0][1] = int(line)
+			if(i == 3):
+				items[1][0] = int(line)
+			if(i == 4):
+				items[1][1] = int(line)
+			if(i == 5):
+				shards[0] = int(line)
+			if(i == 6):
+				shards[1] = int(line)
+			if(i == 7):
+				shards[2] = int(line)
+			if(i == 8):
+				stones[0] = int(line)
+			if(i == 9):
+				stones[1] = int(line)
+			if(i == 10):
+				stones[2] = int(line)
 
-eventHandler(event)
+		f.close()
+		main()
+	if(int(b) == 2):
+		main()
+	if(int(b) == 3):
+		print("1. Show Items(T/F)")
+		b = input()
+		if(int(b) == 1):
+			showItems = False
+		menu()
+def save():
+	f = open('save.txt', 'tw', encoding='utf-8')
+	f.write(str(hp) + '\n')
+	f.write(str(maxhp) + '\n')
+	f.write(str(defense) + '\n')
+	f.write(str(atk) + '\n')
+	f.write(str(xp) + '\n')
+	f.write(str(lvl) + '\n')
+	f.write(str(money) + '\n')
+	f.write(str(waves) + '\n')
+	f.close()
+	f = open('savem.txt', 'tw', encoding='utf-8')
+	for x in range(0, len(items[0])): f.write(str(items[0][x]) + '\n')
+	for x in range(0, len(items[1])): f.write(str(items[1][x]) + '\n')
+	for x in range(0, len(shards)): f.write(str(shards[x]) + '\n')
+	for x in range(0, len(stones)): f.write(str(stones[x]) + '\n')
+	f.close()
+
 spawnInChunk()
 def main():
 	global hp, maxhp, atk, defense, monstersInfo, monstersList, shards, stones, money, items, xp, lvl
 	while hp > 0:
+		buffs[1] = 0
+		buffs[0] = 0
+		eventHandler(event)
+		if(items[1][0] == 0):
+			buffs[0] += 3
+		elif(items[1][0] == 1):
+			buffs[0] += 5
+		if(items[1][1] == 0):
+			buffs[1] += 2
+		elif(items[1][1] == 1):
+			buffs[1] += 3
 		os.system('cls')
 		os.system('clear')
 		print("Event today: " + str(eventList[event[0]]))
@@ -203,33 +297,36 @@ def main():
 			xp -= 100
 			atk += 3
 			defense += 1
-		print("------------" + Fore.CYAN + "Items" + Fore.RESET + "-------------")
-		if(shards[0] != 0):	
-			print("    Water shards: " + str(shards[0]))
-		if(shards[1] != 0):	
-			print("    Sun shards: " + str(shards[1]))
-		if(shards[2] != 0):	
-			print("    Air shards: " + str(shards[2]))
-		if(stones[0] != 0):	
-			print("    Water stones: " + str(stones[0]))
-		if(stones[1] != 0):	
-			print("    Sun stones: " + str(stones[1]))
-		if(stones[2] != 0):	
-			print("    Air stones: " + str(stones[2]))
-		if(items[0] != 0):
-			print("    Bones: " + str(items[0]))
-		if(items[1] != 0):
-			print("    Meat: " + str(items[1]))
+		if(showItems == True):
+			print("------------" + Fore.CYAN + "Items" + Fore.RESET + "-------------")
+			if(shards[0] != 0):	
+				print("    Water shards: " + str(shards[0]))
+			if(shards[1] != 0):	
+				print("    Sun shards: " + str(shards[1]))
+			if(shards[2] != 0):	
+				print("    Air shards: " + str(shards[2]))
+			if(stones[0] != 0):	
+				print("    Water stones: " + str(stones[0]))
+			if(stones[1] != 0):	
+				print("    Sun stones: " + str(stones[1]))
+			if(stones[2] != 0):	
+				print("    Air stones: " + str(stones[2]))
+			if(items[0] != 0):
+				print("    Bones: " + str(items[0][0]))
+			if(items[1] != 0):
+				print("    Meat: " + str(items[0][1]))
 		print("    Money: " + Fore.YELLOW + str(money))
 		print("----------" + Fore.CYAN + "Your stats" + Fore.RESET + "----------")
-		print("    HP: " + Fore.RED + str(hp) + Fore.RESET + "/" + Fore.RED + str(maxhp))
-		print("    Defense: " + Fore.WHITE + Style.DIM + str(defense))
-		print("    Strength: " + Fore.BLUE + str(atk))
+		print("    HP: " + Fore.RED + str(hp) + Fore.RESET + "/" + Fore.RED + str(maxhp + buffs[2]))
+		print("    Defense: " + Fore.WHITE + Style.DIM + str(defense) + " + " + str(buffs[1]))
+		print("    Strength: " + Fore.BLUE + str(atk) + " + " + str(buffs[0]))
 		print("    Exp: " + Fore.GREEN + str(xp) + Fore.RESET + "/" + Fore.GREEN + "100" + Fore.RESET + "; Lvl: " + Fore.MAGENTA + str(lvl))
+		print("    Waves: " + str(waves))
 		print("-----------" + Fore.CYAN + "Monsters" + Fore.RESET + "-----------")
 		for a in range(0, len(mobsInChank)):
 			print(str(a) + ") Monster: " + str(mobsInChank[a][1]) + ", Lvl: " + str(mobsInChank[a][2]))
 		print("------------------------------")
+		print("0) Menu")
 		print("1) Attack")
 		print("2) Heal 50 HP(15 money)")
 		print("3) Workshop")
@@ -239,6 +336,8 @@ def main():
 		b = input()
 		if(b == ""):
 			main()
+		if(int(b) == 0):
+			menu()
 		if(int(b) == 1):
 			print("Enter number of monster: ")
 			c = input()
@@ -267,66 +366,7 @@ def main():
 			stones = newItem[1]
 			items = newItem[2]
 		elif(int(b) == 6):
-			f = open('save.txt', 'tw', encoding='utf-8')
-			f.write(str(hp) + '\n')
-			f.write(str(maxhp) + '\n')
-			f.write(str(defense) + '\n')
-			f.write(str(atk) + '\n')
-			f.write(str(xp) + '\n')
-			f.write(str(lvl) + '\n')
-			f.write(str(money) + '\n')
-			f.close()
-			f = open('savem.txt', 'tw', encoding='utf-8')
-			for x in range(0, len(items)): f.write(str(items[x]) + '\n')
-			for x in range(0, len(shards)): f.write(str(shards[x]) + '\n')
-			for x in range(0, len(stones)): f.write(str(stones[x]) + '\n')
-			f.close()
+			save()
 		else:
 			main()
-print("1. Load save")
-print("2. New game")
-b = input()
-if(int(b) == 1):
-	f = open('save.txt')
-	i = 0
-	for line in f:
-		i += 1
-		if(i == 1):
-			hp = int(line)
-		if(i == 2):
-			maxhp = int(line)
-		if(i == 3):
-			defense = int(line)
-		if(i == 4):
-			atk = int(line)
-		if(i == 5):
-			xp = int(line)
-		if(i == 6):
-			lvl = int(line)
-		if(i == 7):
-			money = int(line)
-	f.close()
-	f = open('savem.txt')
-	i = 0
-	for line in f:
-		i += 1
-		if(i == 1):
-			items[0] = int(line)
-		if(i == 2):
-			items[1] = int(line)
-		if(i == 3):
-			shards[0] = int(line)
-		if(i == 4):
-			shards[1] = int(line)
-		if(i == 5):
-			shards[2] = int(line)
-		if(i == 6):
-			stones[0] = int(line)
-		if(i == 7):
-			stones[1] = int(line)
-		if(i == 8):
-			stones[2] = int(line)
-	f.close()
-	main()
-if(int(b) == 2):
-	main()
+menu()

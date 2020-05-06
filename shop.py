@@ -2,15 +2,19 @@ import os
 from colorama import Fore, init, Style
 import random
 
+toolsName = [["Wooden sword", "Iron sword"], ["Wooden shield", "Iron shield"]] # Swords( 0id - +3 atk, 1id - +5 atk), Shields( 0id - +2 def, 1id - +3 def)
+
 init(autoreset=True)
 
 def shop(money, stones, items):
 	print("0) Back")
 	print("-------------" + Fore.CYAN + "Buy" + Fore.RESET + "--------------")
-	print("1) Buy random stone(120 coins)")
-	print("------------------------------")
+	print("1) Buy random stone(120 money)")
+	print("2) Upgrade sword(200 money)")
+	print("3) Upgrade shield(250 money)")
 	print("-------------" + Fore.CYAN + "Sell" + Fore.RESET + "-------------")
-	print("2) Sell bones(1 pc - 2 money) (Ypu have: " + str(items[0]) + ")")
+	print("4) Sell bones(1 pc - 2 money) (You have: " + str(items[0][0]) + ")")
+	print("5) Sell meat(1 pc - 4 money) (You have: " + str(items[0][1]) + ")")
 	print("------------------------------")
 	b = input()
 	if(int(b) == 0):
@@ -19,16 +23,32 @@ def shop(money, stones, items):
 		ib = random.randrange(0, 2)
 		stones[ib] += 1
 		money -= 120
-	if(int(b) == 2 and items[0] > 0):
+	if(int(b) == 2 and money > 199 and items[1][0] < 1):
+		items[1][0] += 1
+		money -= 200
+	if(int(b) == 3 and money > 249 and items[1][1] < 1):
+		items[1][1] += 1
+		money -= 250
+	if(int(b) == 4 and items[0][0] > 0):
 		print("Enter amount to sell: ")
 		b = input()
-		if(items[0] < int(b)):
+		if(items[0][0] < int(b)):
 			print("Error or not enough items")
 			input()
 			shop(money, stones, items)
 		else:
-			items[0] -= int(b)
+			items[0][0] -= int(b)
 			money += (2 * int(b))
+	if(int(b) == 5 and items[0][1] > 0):
+		print("Enter amount to sell: ")
+		b = input()
+		if(items[0][1] < int(b)):
+			print("Error or not enough items")
+			input()
+			shop(money, stones, items)
+		else:
+			items[0][1] -= int(b)
+			money += (4 * int(b))
 	else:
 		print("Error or not enough items")
 		input()
@@ -38,19 +58,27 @@ def shop(money, stones, items):
 
 def inv(stones, maxhp, defense, atk, items, hp):
 	print("0) Back")
-	print("----------" + Fore.CYAN + "Inventory" + Fore.RESET + "----------")
+	print("---------" + Fore.CYAN + "Backpack" + Fore.RESET + "----------")
 	if(stones[0] != 0):	
 		print("1)    Water stones: " + str(stones[0]))
 	if(stones[1] != 0):	
 		print("2)    Sun stones: " + str(stones[1]))
 	if(stones[2] != 0):	
 		print("3)    Air stones: " + str(stones[2]))
-	if(items[0] != 0):
-		print("4)    Bones: " + str(items[0]))
-	if(items[1] != 0):
-		print("5)    Meat: " + str(items[1]))
+	if(items[0][0] != 0):
+		print("4)    Bones: " + str(items[0][0]))
+	if(items[0][1] != 0):
+		print("5)    Meat: " + str(items[0][1]))
+	print("------------------------------")
+	print("---------" + Fore.CYAN + "Inventory" + Fore.RESET + "-----------")
+	if(items[1][0] != -1):
+		print("Main hand: " + str(toolsName[0][items[1][0]]))
+	if(items[1][1] != -1):
+		print("Second hand: " + str(toolsName[1][items[1][1]]))
 	print("------------------------------")
 	b = input()
+	if(b == ""):
+		inv(stones, maxhp, defense, atk, items, hp)
 	if(int(b) == 0):
 		pass
 	if(int(b) == 1 and stones[0] > 0):
@@ -62,9 +90,9 @@ def inv(stones, maxhp, defense, atk, items, hp):
 	elif(int(b) == 3 and stones[2] > 0):
 		defense += 1
 		stones[2] -= 1
-	elif(int(b) == 5 and items[1] > 0):
-		items[1] -= 1
-		hp += 5
+	elif(int(b) == 5 and items[0][1] > 0):
+		items[0][1] -= 1
+		hp += 7
 	else:
 		pass
 	items = [maxhp, atk, defense, stones, items, hp]
@@ -83,10 +111,10 @@ def Workshop(shards, stones):
 	if(int(a) == 1 and shards[0] > 29):
 		stones[0] += 1
 		shards[0] -= 30
-	elif(int(a) == 2 and shards[2] > 29):
+	elif(int(a) == 2 and shards[1] > 29):
 		stones[1] += 1
 		shards[1] -= 30
-	elif(int(a) == 3 and shards[3] >29):
+	elif(int(a) == 3 and shards[2] >29):
 		stones[2] += 1
 		shards[2] -= 30
 	else:
