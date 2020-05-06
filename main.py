@@ -188,6 +188,7 @@ def attackMob(num, atk):
 			xp += random.randrange(0, dropList[2][1])
 			del mobsInChank[num]
 			break
+		dmg = 0
 		dmg = currMob[0][1] - random.randrange(0, defense) - buffs[1]
 		if(dmg < 0):
 			dmg = 0
