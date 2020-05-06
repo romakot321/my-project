@@ -94,7 +94,7 @@ def spawnInChunk():
 			print("Monster: None")
 		elif(spwnId >= 0):
 			name = monstersList[spwnId][0]
-			monsLvl = random.randrange(1, monstersList[spwnId][1])
+			monsLvl = random.randrange(1, 3)
 			mobsInChank.append([spwnId, name, monsLvl])
 	if(autosave == True):
 		save()
