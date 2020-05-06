@@ -186,8 +186,9 @@ def attackMob(num, atk):
 			xp += random.randrange(0, dropList[2][1])
 			del mobsInChank[num]
 			break
-		hp -= currMob[0][1]
-		print("- " + str(currMob[0][1]) + " hp to you.")
+		dmg = currMob[0][1] - random.randrange(0, defense)
+		hp -= dmg
+		print("- " + str(dmg) + " hp to you.")
 		print("You hp is: " + str(hp))
 		if(hp < 1):
 			break
