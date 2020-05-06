@@ -166,7 +166,9 @@ def attackMob(num, atk):
 	hpE = currMob[0][2]
 	while hpE > 0 or hp > 0:
 		if( ( random.randrange(0,10) + 1 ) > currMob[0][4]):
-			dmg = atk - random.randrange(0, currMob[0][3])
+			dmg = atk - random.randrange(0, currMob[0][3]) + buffs[0]
+			if(dmg < 0):
+				dmg = 0
 			hpE -= dmg
 			print("- " + str(dmg) + " hp to monster.")
 			print("His hp is: " + str(hpE))	
@@ -186,7 +188,9 @@ def attackMob(num, atk):
 			xp += random.randrange(0, dropList[2][1])
 			del mobsInChank[num]
 			break
-		dmg = currMob[0][1] - random.randrange(0, defense)
+		dmg = currMob[0][1] - random.randrange(0, defense) - buffs[1]
+		if(dmg < 0):
+			dmg = 0
 		hp -= dmg
 		print("- " + str(dmg) + " hp to you.")
 		print("You hp is: " + str(hp))
@@ -355,7 +359,7 @@ def main():
 			print("Enter number of monster: ")
 			c = input()
 			if(int(c) > len(mobsInChank)):
-				pass
+				main()
 			else:
 				attackMob(int(c), atk)
 		elif(int(b) == 2 and money > 14):
