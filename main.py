@@ -14,7 +14,7 @@ defense = 5
 atk = 10
 xp = 0
 lvl = 1
-waves = 0
+waves = 19
 i = 0 # счетчик
 money = 0
 buffs = [0,0,0] # atk, def, maxhp
@@ -23,7 +23,7 @@ items = [[0,0], [-1, -1]] # drop[Bone, Meat], equipment[swordId, shieldId]
 dropList = [["Bone",5,30], ["Meat",2,50], ["Exp", 10, 20]] # [dropId,maxCount, dropChance]
 monstersList = [["Small", 3, 50], ["Big", 3, 10], ["Strong", 3, 30], ["Fast", 3, 10]] # monsterName[maxLvl, rateSpawn]
 shards = [0, 0, 0] # water, sun, air
-stones = [0, 0, 0] # ^^^^^^^^^^^^^^^
+stones = [6, 6, 0] # ^^^^^^^^^^^^^^^
 eventList = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 eventList = ["upHP", "upDef", "upAtk"
 			 "upDrop", "upRateSpawn", "upLvlMonsters",
@@ -84,7 +84,7 @@ def mobSpawn():
 		spwnId = -1
 	return spwnId
 def spawnInChunk():
-	global spwnId, waves
+	global spwnId, waves, lvl
 	waves += 1
 	i = 0
 	mobsInChank.clear()
@@ -94,7 +94,17 @@ def spawnInChunk():
 			print("Monster: None")
 		elif(spwnId >= 0):
 			name = monstersList[spwnId][0]
-			monsLvl = random.randrange(1, 3)
+			if(lvl > 4):
+				minlvl = 2
+			else:
+				minlvl = 1
+			if(waves > 19):
+				maxlvl = 5
+			else:
+				maxlvl = 3
+			monsLvl = random.randrange(minlvl, maxlvl)
+			if(waves == 20):
+				mobsInChank.append([0, monstersList[0][0], random.randrange(4,5)])
 			mobsInChank.append([spwnId, name, monsLvl])
 	if(autosave == True):
 		save()
@@ -181,11 +191,17 @@ def attackMob(num, atk):
 				shards[1] += random.randrange(1,3)
 			if(event[2] == 2):
 				shards[2] += random.randrange(1,3)
-			buffMoney = mobsInChank[num][2] * 3
-			money += random.randrange(1, ( 50 + buffMoney ))
+			buffMoney = mobsInChank[num][2] * 4
+			if(lvl > 4):
+				buffMoney += random.randrange(10,20)
+			if(waves > 19):
+				minMoney = 15
+			else:
+				minMoney = 1
+			money += random.randrange(minMoney, ( 50 + buffMoney ))
 			items[0][0] += random.randrange(0, dropList[0][1])
 			items[0][1] += random.randrange(0, dropList[1][1])
-			xp += random.randrange(0, dropList[2][1])
+			xp += random.randrange(1, dropList[2][1])
 			del mobsInChank[num]
 			break
 		dmg = 0
@@ -296,13 +312,13 @@ def main():
 		buffs[0] = 0
 		eventHandler(event)
 		if(items[1][0] == 0):
-			buffs[0] += 3
+			buffs[0] += 10
 		elif(items[1][0] == 1):
-			buffs[0] += 5
+			buffs[0] += 15
 		if(items[1][1] == 0):
-			buffs[1] += 2
+			buffs[1] += 5
 		elif(items[1][1] == 1):
-			buffs[1] += 3
+			buffs[1] += 7
 		os.system('cls')
 		os.system('clear')
 		print("Event today: " + str(eventList[event[0]]))
@@ -314,7 +330,8 @@ def main():
 			lvl += 1
 			xp -= 100
 			atk += 3
-			defense += 1
+			defense += 2
+			hp = maxhp
 		if(showItems == True):
 			print("------------" + Fore.CYAN + "Items" + Fore.RESET + "-------------")
 			if(shards[0] != 0):	
