@@ -199,7 +199,7 @@ def attackMob(num, atk):
 			break
 	currMob.clear()
 def menu():
-	global showItems, autosave
+	global showItems, autosave, hp, maxhp, defense, atk, xp, lvl, money, waves, items, stones, shards
 	print("1. Load save")
 	print("2. New game")
 	print("3. Settings")
