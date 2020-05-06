@@ -5,6 +5,7 @@ import os
 from colorama import Fore, init, Style
 
 showItems = True
+autosave = False
 mob = []
 hp = 100
 maxhp = 100
@@ -95,6 +96,8 @@ def spawnInChunk():
 			name = monstersList[spwnId][0]
 			monsLvl = random.randrange(1, monstersList[spwnId][1])
 			mobsInChank.append([spwnId, name, monsLvl])
+	if(autosave == True):
+		save()
 def infoMob(num):
 	if(mobsInChank[num][0] == monstersInfo[0][0]):
 		mob = monstersInfo[0]
@@ -190,7 +193,7 @@ def attackMob(num, atk):
 			break
 	currMob.clear()
 def menu():
-	global showItems
+	global showItems, autosave
 	print("1. Load save")
 	print("2. New game")
 	print("3. Settings")
@@ -248,9 +251,18 @@ def menu():
 		main()
 	if(int(b) == 3):
 		print("1. Show Items(T/F)")
+		print("2. Autosave every wave(T/F)")
 		b = input()
 		if(int(b) == 1):
-			showItems = False
+			if(showItems):
+				showItems = False
+			else:
+				showItems = True
+		if(int(b) == 2):
+			if(autosave):
+				autosave = False
+			else:
+				autosave = True
 		menu()
 def save():
 	f = open('save.txt', 'tw', encoding='utf-8')
