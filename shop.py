@@ -10,25 +10,49 @@ def shop(money, stones, items):
 	print("0) Back")
 	print("-------------" + Fore.CYAN + "Buy" + Fore.RESET + "--------------")
 	print("1) Buy random stone(120 money)")
-	print("2) Upgrade sword(200 money)")
-	print("3) Upgrade shield(250 money)")
+	print("2) Buy new sword(200-250-350-500 money)")
+	print("3) Buy new shield(250-300-400-550 money)")
 	print("-------------" + Fore.CYAN + "Sell" + Fore.RESET + "-------------")
 	print("4) Sell bones(1 pc - 2 money) (You have: " + str(items[0][0]) + ")")
 	print("5) Sell meat(1 pc - 4 money) (You have: " + str(items[0][1]) + ")")
 	print("------------------------------")
 	b = input()
+	if(b == ""):
+		shop(money, stones, items)
 	if(int(b) == 0):
 		pass
 	if(int(b) == 1 and money > 119):
 		ib = random.randrange(0, 2)
 		stones[ib] += 1
 		money -= 120
-	if(int(b) == 2 and money > 199 and items[1][0] < 1):
-		items[1][0] += 1
-		money -= 200
-	if(int(b) == 3 and money > 249 and items[1][1] < 1):
-		items[1][1] += 1
-		money -= 250
+	if(int(b) == 2 and items[1][0] < 2):
+		if(items[1][0] == 0):
+			nm = 250
+		elif(items[1][0] == 1):
+			nm = 350
+		elif(items[1][0] == 2):
+			nm = 500
+		else:
+			nm = 200
+		if(money > nm - 1):
+			items[1][0] += 1
+			money -= nm
+		else:
+			pass
+	if(int(b) == 3 and items[1][1] < 2):
+		if(items[1][1] == 0):
+			nm = 300
+		elif(items[1][1] == 1):
+			nm = 400
+		elif(items[1][1] == 2):
+			nm = 550
+		else:
+			nm = 250
+		if(money > nm - 1):
+			items[1][1] += 1
+			money -= nm
+		else:
+			pass
 	if(int(b) == 4 and items[0][0] > 0):
 		print("Enter amount to sell: ")
 		b = input()
@@ -50,7 +74,6 @@ def shop(money, stones, items):
 			items[0][1] -= int(b)
 			money += (4 * int(b))
 	else:
-		print("Error or not enough items")
 		input()
 		pass
 	items = [money, stones, items]
