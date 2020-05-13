@@ -23,6 +23,7 @@ currMob = []
 items = [[0,0], [-1, -1]] # drop[Bone, Meat], equipment[swordId, shieldId]
 dropList = [["Bone",5,30], ["Meat",2,50], ["Exp", 10, 20]] # [dropId,maxCount, dropChance]
 monstersList = [["Small", 3, 50], ["Big", 3, 10], ["Strong", 3, 30], ["Fast", 3, 10], ['Zombie', 5, 50], ['Skeleton', 5, 30], ['Big zombie', 5, 10], ['Mega zombie', 7, 10]] # monsterName[maxLvl, rateSpawn]
+dungMonsList = [['Dead', 3, 50], ['Mag', 3, 30], ['Necromancer', 3, 15]]
 shards = [0, 0, 0] # water, sun, air
 stones = [0, 0, 0] # ^^^^^^^^^^^^^^^
 eventList = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
@@ -33,6 +34,7 @@ eventList = ["upHP", "upDef", "upAtk"
 			 "maxMobInChunk+", "maxMobInChunk-"]
 monstersInfo = [[0, 4, 20, 1, 2], [1, 5, 35, 3, 1], [2, 7, 27, 2, 2], [3, 3, 22, 1, 5], [4, 10, 35, 1, 1], [5, 12, 40, 3, 2], [5, 10, 50, 3, 0], [6, 20, 60, 5, 4]] # SpawnId, atk, hp, def, speed
 				# Small			   Big				Strong			  Fast				Zombie             Skeleton           Big zombie         Mega zombie
+dungMonsInfo = [[0, 6, 30, 3, 3], [1, 8, 35, 1, 3], [2, 12, 35, 1, 4]]
 mobsInChank = [] # SpawnId, lvl
 maxMobInChunk = 5
 citesList = [["One", 134, 20], ["Two", 20, 1]] # City name, x, y
@@ -77,15 +79,23 @@ def eventHandler(event):
 		maxMobInChunk += 2
 	elif(event[1] == "maxMobInChunk-"):
 		maxMobInChunk -= 2
-def mobSpawn():
+def mobSpawn(isdung):
 	global i, spwnId, waves
 	i = 0
 	if(waves < 21):
-		for i in range(0, 3):
+		for i in range(0, 2):
 			if(random.randrange(0, 100) <= monstersList[i][2]):
 				spwnId = i
 				break
-		if(i > 3):
+		if(i > 2):
+			spwnId = -1
+	elif(isdung == True):
+		i = 0
+		for i in range(0, 2):
+			if(random.randrange(0, 100) <= dungMonsList[i][2]):
+				spwnId = i
+				break
+		if(i > 2):
 			spwnId = -1
 	else:
 		i = 3
@@ -102,10 +112,14 @@ def spawnChunk(isdung):
 	i = 0
 	mobsInChank.clear()
 	for i in range(0, maxMobInChunk):
-		spwnId = mobSpawn()
+		spwnId = mobSpawn(isdung)
 		if(spwnId == -1):
 			print("Monster: None")
-		elif(spwnId >= 0):
+		elif(spwnId >= 0 and isdung == True):
+			name = dungMonsList[spwnId][0]
+			monsLvl = random.randrange(1, 3)
+			mobsInChank.append([spwnId, name, monsLvl])
+		elif(spwnId >= 0 and isdung != True):
 			name = monstersList[spwnId][0]
 			if(lvl > 4):
 				minlvl = 2
@@ -120,123 +134,168 @@ def spawnChunk(isdung):
 			monsLvl = random.randrange(minlvl, maxlvl)
 			if(waves == 20 and dungChunk[0] != 2):
 				mobsInChank.append([0, monstersList[0][0], random.randrange(4,5)])
-			elif(isdung == True):
-				mobsInChank.append([6, monstersList[6][0], random.randrange(3,5)])
 			else:
 				mobsInChank.append([spwnId, name, monsLvl])
 	if(autosave == True):
 		save()
-def infoMob(num):
-	if(mobsInChank[num][0] == monstersInfo[0][0]):
-		mob = monstersInfo[0]
-		if(mobsInChank[num][2] == 2):
-			mob[1] += 2
-			mob[2] += 15
-		if(mobsInChank[num][2] == 3):
-			mob[1] += 4
-			mob[2] += 19
-		if(mobsInChank[num][2] == 4):
-			mob[1] += 5
-			mob[2] += 22
-		if(mobsInChank[num][2] == 5):
-			mob[1] += 7
-			mob[2] += 25
-		return mob
-	if(mobsInChank[num][0] == monstersInfo[1][0]):
-		mob = monstersInfo[1]
-		if(mobsInChank[num][2] == 2):
-			mob[1] += 2
-			mob[2] += 12
-		if(mobsInChank[num][2] == 3):
-			mob[1] += 3
-			mob[2] += 13
-		if(mobsInChank[num][2] == 4):
-			mob[1] += 5
-			mob[2] += 15
-		if(mobsInChank[num][2] == 5):
-			mob[1] += 6
-			mob[2] += 19
-		return mob
-	if(mobsInChank[num][0] == monstersInfo[2][0]):
-		mob = monstersInfo[2]
-		if(mobsInChank[num][2] == 2):
-			mob[1] += 1
-			mob[2] += 15
-		if(mobsInChank[num][2] == 3):
-			mob[1] += 1
-			mob[2] += 19
-		if(mobsInChank[num][2] == 4):
-			mob[1] += 3
-			mob[2] += 22
-		if(mobsInChank[num][2] == 5):
-			mob[1] += 5
-			mob[2] += 25
-		return mob
-	if(mobsInChank[num][0] == monstersInfo[3][0]):
-		mob = monstersInfo[3]
-		if(mobsInChank[num][2] == 2):
-			mob[1] += 3
-			mob[2] += 16
-		if(mobsInChank[num][2] == 3):
-			mob[1] += 5
-			mob[2] += 20
-		if(mobsInChank[num][2] == 4):
-			mob[1] += 6
-			mob[2] += 25
-		if(mobsInChank[num][2] == 5):
-			mob[1] += 8
-			mob[2] += 28
-		return mob
-	if(mobsInChank[num][0] == monstersInfo[4][0]):
-		mob = monstersInfo[4]
-		if(mobsInChank[num][2] == 2):
-			mob[1] += 3
-			mob[2] += 16
-		if(mobsInChank[num][2] == 3):
-			mob[1] += 5
-			mob[2] += 20
-		if(mobsInChank[num][2] == 4):
-			mob[1] += 6
-			mob[2] += 25
-		if(mobsInChank[num][2] == 5):
-			mob[1] += 8
-			mob[2] += 28
-		return mob
-	if(mobsInChank[num][0] == monstersInfo[5][0]):
-		mob = monstersInfo[5]
-		if(mobsInChank[num][2] == 2):
-			mob[1] += 3
-			mob[2] += 16
-		if(mobsInChank[num][2] == 3):
-			mob[1] += 5
-			mob[2] += 20
-		if(mobsInChank[num][2] == 4):
-			mob[1] += 6
-			mob[2] += 25
-		if(mobsInChank[num][2] == 5):
-			mob[1] += 8
-			mob[2] += 28
-		return mob
-	if(mobsInChank[num][0] == monstersInfo[6][0]):
-		mob = monstersInfo[6]
-		if(mobsInChank[num][2] == 2):
-			mob[1] += 3
-			mob[2] += 16
-		if(mobsInChank[num][2] == 3):
-			mob[1] += 5
-			mob[2] += 20
-		if(mobsInChank[num][2] == 4):
-			mob[1] += 6
-			mob[2] += 25
-		if(mobsInChank[num][2] == 5):
-			mob[1] += 8
-			mob[2] += 28
-		return mob
+def infoMob(num, isdung):
+	if(isdung != True):
+		if(mobsInChank[num][0] == monstersInfo[0][0]):
+			mob = monstersInfo[0]
+			if(mobsInChank[num][2] == 2):
+				mob[1] += 2
+				mob[2] += 15
+			if(mobsInChank[num][2] == 3):
+				mob[1] += 4
+				mob[2] += 19
+			if(mobsInChank[num][2] == 4):
+				mob[1] += 5
+				mob[2] += 22
+			if(mobsInChank[num][2] == 5):
+				mob[1] += 7
+				mob[2] += 25
+			return mob
+		if(mobsInChank[num][0] == monstersInfo[1][0]):
+			mob = monstersInfo[1]
+			if(mobsInChank[num][2] == 2):
+				mob[1] += 2
+				mob[2] += 12
+			if(mobsInChank[num][2] == 3):
+				mob[1] += 3
+				mob[2] += 13
+			if(mobsInChank[num][2] == 4):
+				mob[1] += 5
+				mob[2] += 15
+			if(mobsInChank[num][2] == 5):
+				mob[1] += 6
+				mob[2] += 19
+			return mob
+		if(mobsInChank[num][0] == monstersInfo[2][0]):
+			mob = monstersInfo[2]
+			if(mobsInChank[num][2] == 2):
+				mob[1] += 1
+				mob[2] += 15
+			if(mobsInChank[num][2] == 3):
+				mob[1] += 1
+				mob[2] += 19
+			if(mobsInChank[num][2] == 4):
+				mob[1] += 3
+				mob[2] += 22
+			if(mobsInChank[num][2] == 5):
+				mob[1] += 5
+				mob[2] += 25
+			return mob
+		if(mobsInChank[num][0] == monstersInfo[3][0]):
+			mob = monstersInfo[3]
+			if(mobsInChank[num][2] == 2):
+				mob[1] += 3
+				mob[2] += 16
+			if(mobsInChank[num][2] == 3):
+				mob[1] += 5
+				mob[2] += 20
+			if(mobsInChank[num][2] == 4):
+				mob[1] += 6
+				mob[2] += 25
+			if(mobsInChank[num][2] == 5):
+				mob[1] += 8
+				mob[2] += 28
+			return mob
+		if(mobsInChank[num][0] == monstersInfo[4][0]):
+			mob = monstersInfo[4]
+			if(mobsInChank[num][2] == 2):
+				mob[1] += 3
+				mob[2] += 16
+			if(mobsInChank[num][2] == 3):
+				mob[1] += 5
+				mob[2] += 20
+			if(mobsInChank[num][2] == 4):
+				mob[1] += 6
+				mob[2] += 25
+			if(mobsInChank[num][2] == 5):
+				mob[1] += 8
+				mob[2] += 28
+			return mob
+		if(mobsInChank[num][0] == monstersInfo[5][0]):
+			mob = monstersInfo[5]
+			if(mobsInChank[num][2] == 2):
+				mob[1] += 3
+				mob[2] += 16
+			if(mobsInChank[num][2] == 3):
+				mob[1] += 5
+				mob[2] += 20
+			if(mobsInChank[num][2] == 4):
+				mob[1] += 6
+				mob[2] += 25
+			if(mobsInChank[num][2] == 5):
+				mob[1] += 8
+				mob[2] += 28
+			return mob
+		if(mobsInChank[num][0] == monstersInfo[6][0]):
+			mob = monstersInfo[6]
+			if(mobsInChank[num][2] == 2):
+				mob[1] += 3
+				mob[2] += 16
+			if(mobsInChank[num][2] == 3):
+				mob[1] += 5
+				mob[2] += 20
+			if(mobsInChank[num][2] == 4):
+				mob[1] += 6
+				mob[2] += 25
+			if(mobsInChank[num][2] == 5):
+				mob[1] += 8
+				mob[2] += 28
+			return mob
+	elif(isdung == True):
+		if(mobsInChank[num][0] == dungMonsInfo[0][0]):
+			mob = dungMonsInfo[0]
+			if(mobsInChank[num][2] == 2):
+				mob[1] += 2
+				mob[2] += 15
+			if(mobsInChank[num][2] == 3):
+				mob[1] += 4
+				mob[2] += 19
+			if(mobsInChank[num][2] == 4):
+				mob[1] += 5
+				mob[2] += 22
+			if(mobsInChank[num][2] == 5):
+				mob[1] += 7
+				mob[2] += 25
+			return mob
+		if(mobsInChank[num][0] == dungMonsInfo[1][0]):
+			mob = dungMonsInfo[1]
+			if(mobsInChank[num][2] == 2):
+				mob[1] += 2
+				mob[2] += 12
+			if(mobsInChank[num][2] == 3):
+				mob[1] += 3
+				mob[2] += 13
+			if(mobsInChank[num][2] == 4):
+				mob[1] += 5
+				mob[2] += 15
+			if(mobsInChank[num][2] == 5):
+				mob[1] += 6
+				mob[2] += 19
+			return mob
+		if(mobsInChank[num][0] == dungMonsInfo[2][0]):
+			mob = dungMonsInfo[2]
+			if(mobsInChank[num][2] == 2):
+				mob[1] += 1
+				mob[2] += 15
+			if(mobsInChank[num][2] == 3):
+				mob[1] += 1
+				mob[2] += 19
+			if(mobsInChank[num][2] == 4):
+				mob[1] += 3
+				mob[2] += 22
+			if(mobsInChank[num][2] == 5):
+				mob[1] += 5
+				mob[2] += 25
+			return mob
 
 def attackMob(num, isdung):
 	global currMob, hp, shards, money, xp, items, dungChunk, atk
 	print("You attack a " + str(mobsInChank[num][1] + " Monster"))
-	currMob.append(infoMob(num))
+	currMob.append(infoMob(num, isdung))
 	hpE = currMob[0][2]
 	while hp > 0:
 		if( ( random.randrange(0,10) + 1 ) > currMob[0][4]):
@@ -249,12 +308,29 @@ def attackMob(num, isdung):
 		else:
 			print("Monster not take damage")
 		if(hpE < 1):
+			if(isdung == True):
+				rand = random.randrange(0, 100)
+				if(rand >= 25 and rand <= 30):
+					print("A dungeon sword has been dropped!(+40 atk)")
+					print("Equip?")
+					print("1) Yes, 2) No")
+					b = input()
+					if(int(b) == 1):
+						items[1][0] = 'D'
+					else:
+						pass
 			if(event[2] == 0):
 				shards[0] += random.randrange(1,3)
-			if(event[2] == 1):
+				if(isdung == True):
+					shards[0] += random.randrange(1,3)
+			elif(event[2] == 1):
 				shards[1] += random.randrange(1,3)
-			if(event[2] == 2):
+				if(isdung == True):
+					shards[1] += random.randrange(1,3)
+			elif(event[2] == 2):
 				shards[2] += random.randrange(1,3)
+				if(isdung == True):
+					shards[2] += random.randrange(1,3)
 			buffMoney = mobsInChank[num][2] * 4
 			if(infoChunk[0] == 1):
 				buffMoney += random.randrange(30, 100)
@@ -264,7 +340,10 @@ def attackMob(num, isdung):
 				minMoney = 15
 			else:
 				minMoney = 1
-			money += random.randrange(minMoney, ( 50 + buffMoney ))
+			getmoney = random.randrange(minMoney, 50)
+			getmoney += buffMoney
+			money += getmoney
+			print("You get " + Fore.YELLOW + str(getmoney) + Fore.RESET + " money")
 			items[0][0] += random.randrange(0, dropList[0][1])
 			items[0][1] += random.randrange(0, dropList[1][1])
 			xp += random.randrange(1, dropList[2][1])
@@ -281,7 +360,7 @@ def attackMob(num, isdung):
 			print("You dont take damage")
 		print("You hp is: " + str(hp))
 		if(hp < 1):
-			break
+			quit()
 	currMob.clear()
 	if(isdung == True):
 		dung(items, mobsInChank)
@@ -393,8 +472,12 @@ def checkChunk():
 	return dungChunk
 
 def dung(items, mobsInChank):
+	global hp
+	if(mobsInChank == []):
+		main()
 	os.system('cls')
 	os.system('clear')
+	print("HP: " + str(hp))
 	print("-----------" + Fore.CYAN + "Monsters" + Fore.RESET + "-----------")
 	for a in range(0, len(mobsInChank)):
 		print(str(a) + ") Monster: " + str(mobsInChank[a][1]) + ", Lvl: " + str(mobsInChank[a][2]))
@@ -409,13 +492,18 @@ def dung(items, mobsInChank):
 	elif(int(b) > len(mobsInChank)):
 		dung(items, mobsInChank)
 	else:
-		attackMob(int(b), isdung = True)
+		isdung = True
+		attackMob(int(b), isdung)
 
 infoChunk = chunkList.read().split()
 dungChunk = checkChunk()
 spawnChunk(isdung = False)
 def main():
-	global hp, maxhp, atk, defense, monstersInfo, monstersList, shards, stones, money, items, xp, lvl, dungChunk, speed
+	global hp, maxhp, atk, defense, monstersInfo, monstersList, shards, stones, money, items, xp, lvl, dungChunk, speed, waves
+	if(waves > len(infoChunk)):
+		print("Wow! Max waves? Very good! But...")
+		waves = 1
+		money += 100000
 	while hp > 0:
 		buffs[1] = 0
 		buffs[0] = 0
@@ -426,6 +514,8 @@ def main():
 			buffs[0] += 15
 		elif(items[1][0] == 2):
 			buffs[0] += 25
+		elif(items[1][0] == 'D'):
+			buffs[0] += 40
 		if(items[1][1] == 0):
 			buffs[1] += 5
 		elif(items[1][1] == 1):
@@ -437,13 +527,13 @@ def main():
 		if(mobsInChank == []):
 			dungChunk = checkChunk()
 			spawnChunk(isdung = False)
-		print(dungChunk[0])
 		if(int(dungChunk[0]) == 2):
 			print("------------------------------")
 			print("    This chunk is dungeon     ")
 			print("            Enter?            ")
 			print("0) Yes")
 			print("1) No")
+			print("2) Heal 50 hp(40 money, you have " + str(money) + " money and " + str(hp) + " hp") 
 			print("------------------------------")
 			b = input()
 			if(int(b) == 0):
@@ -451,6 +541,12 @@ def main():
 				dung(items, mobsInChank)
 			if(int(b) == 1):
 				pass
+			if(int(b) == 2 and money > 39 and hp < maxhp):
+				hp += 50
+				money -= 40
+				if(hp > maxhp):
+					hp = maxhp
+				main()
 		print("Event today: " + str(eventList[event[0]]))
 		if(hp > maxhp):
 			hp = maxhp
@@ -505,49 +601,55 @@ def main():
 		for a in range(0, len(mobsInChank)):
 			print(str(a) + ") Monster: " + str(mobsInChank[a][1]) + ", Lvl: " + str(mobsInChank[a][2]))
 		print("------------------------------")
+		print("Q) Quit")
 		print("0) Menu")
 		print("1) Attack")
-		print("2) Heal 50 HP(15 money)")
+		print("2) Heal 50 HP(40 money)")
 		print("3) Workshop")
 		print("4) Open inventory")
 		print("5) Shop")
 		print("6) Save")
-		b = input()
-		if(b == ""):
-			main()
-		if(int(b) == 0):
-			menu()
-		if(int(b) == 1):
-			print("Enter number of monster: ")
-			c = input()
-			if(c == ""):
+		try:
+			b = input()
+			if(b == ""):
 				main()
-			if(int(c) > len(mobsInChank)):
-				main()
+			if(b == "Q" or b == 'q'):
+				quit()
+			if(int(b) == 0):
+				menu()
+			if(int(b) == 1):
+				print("Enter number of monster: ")
+				c = input()
+				if(c == ""):
+					main()
+				if(int(c) > len(mobsInChank)):
+					main()
+				else:
+					attackMob(int(c), isdung = False)
+			elif(int(b) == 2 and money > 39 and hp < maxhp):
+				money -= 40
+				hp += 50
+			elif(int(b) == 3):
+				newItem = shop.Workshop(shards, stones)
+				shards = newItem[1]
+				stones = newItem[0]
+			elif(int(b) == 4):
+				newItem = shop.inv(stones, maxhp, defense, atk, items, hp)
+				maxhp = newItem[0]
+				atk = newItem[1]
+				defense = newItem[2]
+				stones = newItem[3]
+				items = newItem[4]
+				hp = newItem[5]
+			elif(int(b) == 5):
+				newItem = shop.shop(money, stones, items)
+				money = newItem[0]
+				stones = newItem[1]
+				items = newItem[2]
+			elif(int(b) == 6):
+				save()
 			else:
-				attackMob(int(c), isdung = False)
-		elif(int(b) == 2 and money > 14):
-			money -= 15
-			hp += 50
-		elif(int(b) == 3):
-			newItem = shop.Workshop(shards, stones)
-			shards = newItem[1]
-			stones = newItem[0]
-		elif(int(b) == 4):
-			newItem = shop.inv(stones, maxhp, defense, atk, items, hp)
-			maxhp = newItem[0]
-			atk = newItem[1]
-			defense = newItem[2]
-			stones = newItem[3]
-			items = newItem[4]
-			hp = newItem[5]
-		elif(int(b) == 5):
-			newItem = shop.shop(money, stones, items)
-			money = newItem[0]
-			stones = newItem[1]
-			items = newItem[2]
-		elif(int(b) == 6):
-			save()
-		else:
+				main()
+		except ValueError:
 			main()
 menu()
