@@ -1,6 +1,7 @@
 import os
 from colorama import Fore, init, Style
 import random
+import main
 
 toolsName = [["Wooden sword", "Iron sword"], ["Wooden shield", "Iron shield"]] # Swords( 0id - +3 atk, 1id - +5 atk), Shields( 0id - +2 def, 1id - +3 def)
 
@@ -145,4 +146,21 @@ def Workshop(shards, stones):
 		input()
 		pass
 	items = [stones, shards]
-	return items
+	return item
+
+def dung(items, mobsInChank):
+	print("-----------" + Fore.CYAN + "Monsters" + Fore.RESET + "-----------")
+	for a in range(0, len(mobsInChank)):
+		print(str(a) + ") Monster: " + str(mobsInChank[a][1]) + ", Lvl: " + str(mobsInChank[a][2]))
+	print("------------------------------")
+	print("Enter 'exit' for exit")
+	print("Enter number of a Monster to attack him: ")
+	b = input()
+	if(b == 'exit'):
+		main.main()
+	if(c == ""):
+		dungeon(items, mobsInChank)
+	if(int(c) > len(mobsInChank)):
+		dungeon(items, mobsInChank)
+	else:
+		main.attackMob(int(c))

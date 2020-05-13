@@ -96,8 +96,8 @@ def mobSpawn():
 		if(i > 6):
 			spwnId = -1
 	return spwnId
-def spawnChunk():
-	global spwnId, waves, lvl, infoChunk
+def spawnChunk(isdung):
+	global spwnId, waves, lvl, infoChunk, dungChunk
 	waves += 1
 	i = 0
 	mobsInChank.clear()
@@ -118,8 +118,10 @@ def spawnChunk():
 			else:
 				maxlvl = 3
 			monsLvl = random.randrange(minlvl, maxlvl)
-			if(waves == 20):
+			if(waves == 20 and dungChunk[0] != 2):
 				mobsInChank.append([0, monstersList[0][0], random.randrange(4,5)])
+			elif(isdung == True):
+				mobsInChank.append([6, monstersList[6][0], random.randrange(3,5)])
 			else:
 				mobsInChank.append([spwnId, name, monsLvl])
 	if(autosave == True):
@@ -231,7 +233,7 @@ def infoMob(num):
 			mob[2] += 28
 		return mob
 
-def attackMob(num):
+def attackMob(num, isdung):
 	global currMob, hp, shards, money, xp, items, dungChunk, atk
 	print("You attack a " + str(mobsInChank[num][1] + " Monster"))
 	currMob.append(infoMob(num))
@@ -266,8 +268,6 @@ def attackMob(num):
 			items[0][0] += random.randrange(0, dropList[0][1])
 			items[0][1] += random.randrange(0, dropList[1][1])
 			xp += random.randrange(1, dropList[2][1])
-			print(buffMoney)
-			input()
 			del mobsInChank[num]
 			break
 		dmg = 0
@@ -283,6 +283,8 @@ def attackMob(num):
 		if(hp < 1):
 			break
 	currMob.clear()
+	if(isdung == True):
+		dung(items, mobsInChank)
 def menu():
 	global showItems, autosave, hp, maxhp, defense, atk, xp, lvl, money, waves, items, stones, shards
 	print("1. Load save")
@@ -390,9 +392,28 @@ def checkChunk():
 	dungChunk = [thisChunk, nextChunk]
 	return dungChunk
 
+def dung(items, mobsInChank):
+	os.system('cls')
+	os.system('clear')
+	print("-----------" + Fore.CYAN + "Monsters" + Fore.RESET + "-----------")
+	for a in range(0, len(mobsInChank)):
+		print(str(a) + ") Monster: " + str(mobsInChank[a][1]) + ", Lvl: " + str(mobsInChank[a][2]))
+	print("------------------------------")
+	print("Enter 'exit' for exit")
+	print("Enter number of a Monster to attack him: ")
+	b = input()
+	if(b == 'exit'):
+		main()
+	elif(b == ""):
+		dung(items, mobsInChank)
+	elif(int(b) > len(mobsInChank)):
+		dung(items, mobsInChank)
+	else:
+		attackMob(int(b), isdung = True)
+
 infoChunk = chunkList.read().split()
 dungChunk = checkChunk()
-spawnChunk()
+spawnChunk(isdung = False)
 def main():
 	global hp, maxhp, atk, defense, monstersInfo, monstersList, shards, stones, money, items, xp, lvl, dungChunk, speed
 	while hp > 0:
@@ -413,10 +434,24 @@ def main():
 			buffs[1] += 13
 		os.system('cls')
 		os.system('clear')
-		print("Event today: " + str(eventList[event[0]]))
 		if(mobsInChank == []):
-			spawnChunk()
 			dungChunk = checkChunk()
+			spawnChunk(isdung = False)
+		print(dungChunk[0])
+		if(int(dungChunk[0]) == 2):
+			print("------------------------------")
+			print("    This chunk is dungeon     ")
+			print("            Enter?            ")
+			print("0) Yes")
+			print("1) No")
+			print("------------------------------")
+			b = input()
+			if(int(b) == 0):
+				spawnChunk(isdung = True)
+				dung(items, mobsInChank)
+			if(int(b) == 1):
+				pass
+		print("Event today: " + str(eventList[event[0]]))
 		if(hp > maxhp):
 			hp = maxhp
 		if(xp > 99):
@@ -443,17 +478,21 @@ def main():
 				print("    Bones: " + str(items[0][0]))
 			if(items[1] != 0):
 				print("    Meat: " + str(items[0][1]))
-		print(dungChunk)
+		print("-------------" + Fore.CYAN + "Info" + Fore.RESET + "-------------")
 		print("    This chunk is ", end = '')
 		if(int(dungChunk[0]) == 0):
 			print("empty", end = '')
+		elif(int(dungChunk[0]) == 1):
+			print("with chest", end = '')
 		else:
-			print("dungeon", end = '')
+			print("dungeon")
 		print(", next chunk is ", end='')
 		if(int(dungChunk[1]) == 0):
 			print("empty")
+		elif(int(dungChunk[1]) == 1):
+			print("with chest")
 		else:
-			print('dungeon')
+			print("dungeon")
 		print("    Money: " + Fore.YELLOW + str(money))
 		print("----------" + Fore.CYAN + "Your stats" + Fore.RESET + "----------")
 		print("    HP: " + Fore.RED + str(hp) + Fore.RESET + "/" + Fore.RED + str(maxhp + buffs[2]))
@@ -486,7 +525,7 @@ def main():
 			if(int(c) > len(mobsInChank)):
 				main()
 			else:
-				attackMob(int(c))
+				attackMob(int(c), isdung = False)
 		elif(int(b) == 2 and money > 14):
 			money -= 15
 			hp += 50
