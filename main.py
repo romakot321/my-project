@@ -614,6 +614,7 @@ def main():
 			if(b == ""):
 				main()
 			if(b == "Q" or b == 'q'):
+				save()
 				quit()
 			if(int(b) == 0):
 				menu()
