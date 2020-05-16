@@ -20,7 +20,7 @@ i = 0 # счетчик
 money = 0
 buffs = [0,0,0] # atk, def, maxhp
 currMob = []
-items = [[0,0], [-1, -1]] # drop[Bone, Meat], equipment[swordId, shieldId]
+items = [[0,0], [-1, -1, 0, 0]] # drop[Bone, Meat], equipment[swordId, shieldId, upgradeSword, upgradeShield]
 dropList = [["Bone",5,30], ["Meat",2,50], ["Exp", 10, 20]] # [dropId,maxCount, dropChance]
 monstersList = [["Small", 3, 50], ["Big", 3, 10], ["Strong", 3, 30], ["Fast", 3, 10], ['Zombie', 5, 50], ['Skeleton', 5, 30], ['Big zombie', 5, 10], ['Mega zombie', 7, 10]] # monsterName[maxLvl, rateSpawn]
 dungMonsList = [['Dead', 3, 50], ['Mag', 3, 30], ['Necromancer', 3, 15]]
@@ -37,7 +37,9 @@ monstersInfo = [[0, 4, 20, 1, 2], [1, 5, 35, 3, 1], [2, 7, 27, 2, 2], [3, 3, 22,
 dungMonsInfo = [[0, 6, 30, 3, 3], [1, 8, 35, 1, 3], [2, 12, 35, 1, 4]]
 mobsInChank = [] # SpawnId, lvl
 maxMobInChunk = 5
-citesList = [["One", 134, 20], ["Two", 20, 1]] # City name, x, y
+citesList = [["One", 0], ["Two", 0]] # City name, unlocked?(0 - False, 1 - True)
+
+cityH = shop.cites
 
 weather = getEvent.getWeather()
 event = getEvent.setEvent()
@@ -369,6 +371,7 @@ def menu():
 	print("1. Load save")
 	print("2. New game")
 	print("3. Settings")
+	print("4. Info about current world generation")
 	b = input()
 	if(int(b) == 1):
 		f = open('save.txt')
@@ -405,21 +408,25 @@ def menu():
 			if(i == 4):
 				items[1][1] = int(line)
 			if(i == 5):
-				shards[0] = int(line)
+				items[1][2] = int(line)
 			if(i == 6):
-				shards[1] = int(line)
+				items[1][3] = int(line)
 			if(i == 7):
-				shards[2] = int(line)
+				shards[0] = int(line)
 			if(i == 8):
-				stones[0] = int(line)
+				shards[1] = int(line)
 			if(i == 9):
-				stones[1] = int(line)
+				shards[2] = int(line)
 			if(i == 10):
+				stones[0] = int(line)
+			if(i == 11):
+				stones[1] = int(line)
+			if(i == 12):
 				stones[2] = int(line)
 
 		f.close()
 		main()
-	if(int(b) == 2):
+	elif(int(b) == 2):
 		hp = 100
 		maxhp = 100
 		defense = 5
@@ -432,7 +439,7 @@ def menu():
 		stones = [0,0,0]
 		shards = [0,0,0]
 		main()
-	if(int(b) == 3):
+	elif(int(b) == 3):
 		print("1. Show Items(T/F)")
 		print("2. Autosave every wave(T/F)")
 		b = input()
@@ -447,6 +454,16 @@ def menu():
 			else:
 				autosave = True
 		menu()
+	elif(int(b) == 4):
+		i = 0
+		for z in range(0, len(infoChunk)):
+			if(int(infoChunk[z]) == 3):
+				print("City one at " + str(z) + " chunk")
+			elif(int(infoChunk[z]) == 4):
+				print("City two at " + str(z) + " chunk")
+	else:
+		menu()
+	menu()
 def save():
 	f = open('save.txt', 'tw', encoding='utf-8')
 	f.write(str(hp) + '\n')
@@ -497,6 +514,7 @@ def dung(items, mobsInChank):
 
 infoChunk = chunkList.read().split()
 dungChunk = checkChunk()
+chunkList.close()
 spawnChunk(isdung = False)
 def main():
 	global hp, maxhp, atk, defense, monstersInfo, monstersList, shards, stones, money, items, xp, lvl, dungChunk, speed, waves
@@ -510,18 +528,25 @@ def main():
 		eventHandler(event)
 		if(items[1][0] == 0):
 			buffs[0] += 10
+			buffs[0] += items[1][2]
 		elif(items[1][0] == 1):
 			buffs[0] += 15
+			buffs[0] += items[1][2]
 		elif(items[1][0] == 2):
 			buffs[0] += 25
+			buffs[0] += items[1][2]
 		elif(items[1][0] == 'D'):
 			buffs[0] += 40
+			buffs[0] += items[1][2]
 		if(items[1][1] == 0):
 			buffs[1] += 5
+			buffs[1] += items[1][3]
 		elif(items[1][1] == 1):
 			buffs[1] += 7
+			buffs[1] += items[1][3]
 		elif(items[1][1] == 2):
 			buffs[1] += 13
+			buffs[1] += items[1][3]
 		os.system('cls')
 		os.system('clear')
 		if(mobsInChank == []):
@@ -547,6 +572,12 @@ def main():
 				if(hp > maxhp):
 					hp = maxhp
 				main()
+		if(int(infoChunk[waves]) == 3):
+			print("You unlocked city " + str(citesList[0][0]))
+			citesList[0][1] = 1
+		elif(int(infoChunk[waves]) == 4):
+			print("You unlocked city " + str(citesList[1][0]))
+			citesList[1][1] = 1
 		print("Event today: " + str(eventList[event[0]]))
 		if(hp > maxhp):
 			hp = maxhp
@@ -609,6 +640,8 @@ def main():
 		print("4) Open inventory")
 		print("5) Shop")
 		print("6) Save")
+		if(citesList[0][1] == 1 or citesList[1][1] == 1):
+			print("7) Teleport")
 		try:
 			b = input()
 			if(b == ""):
@@ -649,6 +682,24 @@ def main():
 				items = newItem[2]
 			elif(int(b) == 6):
 				save()
+			if(int(b) == 7):
+				if(citesList[0][1] == 1):
+					print("1) Tp to city " + str(citesList[0][0]))
+				if(citesList[1][1] == 1):
+					print("2) Tp to city " + str(citesList[1][0]))
+				if(citesList[0][1] == 1 or citesList[1][1] == 1):
+					b = input()
+					if(int(b) == 1):
+						newItem = cityH(0, citesList, items, money)
+						items = newItem[0]
+						money = newItem[1]
+					elif(int(b) == 2):
+						newItem = shop.cites(1, citesList, items, money)
+						items = newItem[0]
+						money = newItem[1]
+					else:
+						pass
+				main()
 			else:
 				main()
 		except ValueError:

@@ -1,12 +1,11 @@
 import os
 from colorama import Fore, init, Style
 import random
-import main
 
 toolsName = [["Wooden sword", "Iron sword"], ["Wooden shield", "Iron shield"]] # Swords( 0id - +3 atk, 1id - +5 atk), Shields( 0id - +2 def, 1id - +3 def)
 
 init(autoreset=True)
-
+		
 def shop(money, stones, items):
 	print("0) Back")
 	print("-------------" + Fore.CYAN + "Buy" + Fore.RESET + "--------------")
@@ -97,6 +96,8 @@ def inv(stones, maxhp, defense, atk, items, hp):
 	print("---------" + Fore.CYAN + "Inventory" + Fore.RESET + "-----------")
 	if(items[1][0] != -1):
 		print("Main hand: " + str(toolsName[0][items[1][0]]))
+		if(items[1][2] != 0):
+			print("    (+ " + str(item[1][2] + " atk"))
 	if(items[1][1] != -1):
 		print("Second hand: " + str(toolsName[1][items[1][1]]))
 	print("------------------------------")
@@ -148,19 +149,23 @@ def Workshop(shards, stones):
 	items = [stones, shards]
 	return item
 
-def dung(items, mobsInChank):
-	print("-----------" + Fore.CYAN + "Monsters" + Fore.RESET + "-----------")
-	for a in range(0, len(mobsInChank)):
-		print(str(a) + ") Monster: " + str(mobsInChank[a][1]) + ", Lvl: " + str(mobsInChank[a][2]))
-	print("------------------------------")
-	print("Enter 'exit' for exit")
-	print("Enter number of a Monster to attack him: ")
+def cites(cityId, cites, items, money):
+	os.system('cls')
+	os.system('clear')
+	print("            " + Fore.GREEN + Style.DIM + str(cites[cityId][0]))
+	print("1) Upgrade items")
 	b = input()
-	if(b == 'exit'):
-		main.main()
-	if(c == ""):
-		dungeon(items, mobsInChank)
-	if(int(c) > len(mobsInChank)):
-		dungeon(items, mobsInChank)
+	if(int(b) == 1):
+		print("1) Upgrade sword(550 money)(+10 atk)")
+		print("2) Upgrade shield(700 money)(+7 defense)")
+		b = input()
+		if(int(b) == 1 and money > 549 and items[1][0] != -1):
+			items[1][2] += 10
+			money -= 550
+		elif(int(b) == 2 and money > 699 and items[1][0] != -1):
+			items[1][3] += 7
+			money -= 700
 	else:
-		main.attackMob(int(c))
+		pass
+	items = [items, money]
+	return items
