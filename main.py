@@ -38,6 +38,10 @@ dungMonsInfo = [[0, 6, 30, 3, 3], [1, 8, 35, 1, 3], [2, 12, 35, 1, 4]]
 mobsInChank = [] # SpawnId, lvl
 maxMobInChunk = 5
 citesList = [["One", 0], ["Two", 0]] # City name, unlocked?(0 - False, 1 - True)
+# Cards types: 0 - attack, 1 - def, 2 - heal
+allCards = [[0, "Basic attack", 0, 0], [1, "Basic shield", 1, 0], [2, "Basic heal", 2, 0], [3, "Ultra attack", 0, 1], [4, "Heal potion", 2, 1]] # IdCard, Name, Type, id in allCardInfo
+allCardsInfo = [[[0, 10], [1, 50]], [[0, 5]], [[0, 20]]] # AtkType[id, points], DefType[id, points], HealType[id, points]
+plDeck = [] # Card id
 
 cityH = shop.cites
 
@@ -48,6 +52,102 @@ chunkList = open('gen.txt')
 
 init(autoreset=True)
 
+def sandboxAI(hp, hpE):
+	idC = -1
+	if hp < 20:
+		idC = 0
+	elif hpE < 51:
+		idC = 2
+	else:
+		idC = 0
+	return idC
+
+def sandbox(plDeck):
+	global allCards, allCardsInfo
+	os.system('cls')
+	os.system('clear')
+	print(" Enter maxhp opponent")
+	maxhpE = int(input())
+	# print(" Enter atk opponent")
+	# atkE = int(input())
+	print(" Enter defense opponent")
+	defE = int(input())
+	# print(" Enter speed opponent")
+	# spdE = int(input())
+	hpE = maxhpE
+	print(" Enter your maxhp")
+	maxhp = int(input())
+	# print(" Enter atk opponent")
+	# atkE = int(input())
+	print(" Enter your defense")
+	defense = int(input())
+	hp = maxhp
+	currCard = [0]
+	currDeck = plDeck
+	turn = True
+	while hpE > 0:
+		os.system('cls')
+		os.system('clear')
+		print("   Enemy info: ")
+		print(" HP: " + str(hpE) + "/" + str(maxhpE))
+		print(" Defense: " + str(defE))
+		print("   Your info: ")
+		print(" HP: " + str(hp) + "/" + str(maxhp))
+		print(" Defense: " + str(defense))
+		print("   Your deck: ")
+		for x in range(len(currDeck)):
+			if(currDeck[x] != -1):
+				print(str(allCards[currDeck[x]][0]) + ") " + str(allCards[currDeck[x]][1]))
+		if(turn == True):
+			b = input()
+			idC = int(b)
+			x = 0
+			for x in range(len(allCards)):
+				if(allCards[x][0] == idC):
+					currCard = allCardsInfo[allCards[x][2]][allCards[x][3]]
+					typeId = allCards[x][2]
+					nxt = False
+					for p in range(len(currDeck)):
+						if(int(currDeck[p]) == int(idC)):
+							nxt = True
+							# del currDeck[p]
+							break
+					# currCard = [id, points]
+					break
+			if(nxt == True):
+				if(typeId == 0):
+					hpE -= currCard[1]
+				elif(typeId == 1):
+					defense += currCard[1]
+				elif(typeId == 2):
+					hp += currCard[1]
+					if(hp > maxhp):
+						hp = maxhp
+				turn = False
+			elif(nxt == False):
+				currDeck = plDeck
+		else:
+			idC = sandboxAI(hp, hpE)
+			x = 0
+			for x in range(len(allCards)):
+				if(allCards[x][0] == idC):
+					print(x)
+					currCard = allCardsInfo[allCards[x][2]][allCards[x][3]]
+					typeId = allCards[x][2]
+					print(currCard)
+					# currCard = [id, points, type]
+					break
+			if(typeId == 0):
+				hp -= currCard[1]
+			elif(typeId == 1):
+				defE += currCard[1]
+			elif(typeId == 2):
+				hpE += currCard[1]
+				if(hpE > maxhpE):
+					hpE = maxhpE
+			turn = True
+		if(hp < 1):
+			break
 def eventHandler(event):
 	global hp, defense, atk, dropList, monstersList
 	if(event[0] == "upHP"):
@@ -295,7 +395,7 @@ def infoMob(num, isdung):
 			return mob
 
 def attackMob(num, isdung):
-	global currMob, hp, shards, money, xp, items, dungChunk, atk
+	global currMob, hp, shards, money, xp, items, dungChunk, atk, plDeck, allCards
 	print("You attack a " + str(mobsInChank[num][1] + " Monster"))
 	currMob.append(infoMob(num, isdung))
 	hpE = currMob[0][2]
@@ -321,6 +421,12 @@ def attackMob(num, isdung):
 						items[1][0] = 'D'
 					else:
 						pass
+				if(rand >= 50 and rand <= 60):
+					print("You got a random card!")
+					dropCard = random.randrange(0, len(allCards))
+					plDeck.append(dropCard)
+					print("You got a " + str(allCards[dropCard][1]))
+					input()
 			if(event[2] == 0):
 				shards[0] += random.randrange(1,3)
 				if(isdung == True):
@@ -367,12 +473,14 @@ def attackMob(num, isdung):
 	if(isdung == True):
 		dung(items, mobsInChank)
 def menu():
-	global showItems, autosave, hp, maxhp, defense, atk, xp, lvl, money, waves, items, stones, shards
+	global plDeck, showItems, autosave, hp, maxhp, defense, atk, xp, lvl, money, waves, items, stones, shards
 	print("1. Load save")
 	print("2. New game")
-	print("3. Settings")
+	print("3. Options")
 	print("4. Info about current world generation")
 	b = input()
+	if(b == ""):
+		menu()
 	if(int(b) == 1):
 		f = open('save.txt')
 		i = 0
@@ -423,7 +531,8 @@ def menu():
 				stones[1] = int(line)
 			if(i == 12):
 				stones[2] = int(line)
-
+			if(i > 12):
+				plDeck.append(int(line))
 		f.close()
 		main()
 	elif(int(b) == 2):
@@ -435,24 +544,33 @@ def menu():
 		lvl = 1
 		money = 0
 		waves = 1
-		items = [[0,0], [-1, -1]]
+		items = [[0,0], [-1, -1, 0, 0]]
 		stones = [0,0,0]
 		shards = [0,0,0]
+		plDeck = []
 		main()
 	elif(int(b) == 3):
-		print("1. Show Items(T/F)")
-		print("2. Autosave every wave(T/F)")
+		print("1) Settings")
+		print("2) Sandbox")
 		b = input()
 		if(int(b) == 1):
-			if(showItems):
-				showItems = False
-			else:
-				showItems = True
-		if(int(b) == 2):
-			if(autosave):
-				autosave = False
-			else:
-				autosave = True
+			print("1. Show Items(T/F)")
+			print("2. Autosave every wave(T/F)")
+			b = input()
+			if(int(b) == 1):
+				if(showItems):
+					showItems = False
+				else:
+					showItems = True
+			if(int(b) == 2):
+				if(autosave):
+					autosave = False
+				else:
+					autosave = True
+		elif(int(b) == 2 and plDeck != []):
+			sandbox(plDeck)
+		elif(plDeck == []):
+			print("You don't have cards")
 		menu()
 	elif(int(b) == 4):
 		i = 0
@@ -480,6 +598,7 @@ def save():
 	for x in range(0, len(items[1])): f.write(str(items[1][x]) + '\n')
 	for x in range(0, len(shards)): f.write(str(shards[x]) + '\n')
 	for x in range(0, len(stones)): f.write(str(stones[x]) + '\n')
+	for x in range(0, len(plDeck)): f.write(str(plDeck[x]) + '\n')
 	f.close()
 def checkChunk():
 	global waves, infoChunk
