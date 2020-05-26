@@ -3,7 +3,11 @@ import random
 import shop
 import os
 from colorama import Fore, init, Style
+import pickle
+import socket
 
+sock = socket.socket()
+BUFFER_SIZE = 4096
 showItems = True
 autosave = False
 mob = []
@@ -472,12 +476,76 @@ def attackMob(num, isdung):
 	currMob.clear()
 	if(isdung == True):
 		dung(items, mobsInChank)
+
+def server():
+	global hp, defense, atk
+	sock.bind(('', 9090))
+	sock.listen(1)
+
+	while True:
+		conn, addr = sock.accept()
+		print('Connected:', addr)
+
+		all_data = bytearray()
+		while True:
+				data = conn.recv(BUFFER_SIZE)
+				if not data:
+					break
+				print('Recv: {}: {}'.format(len(data), data))
+				all_data += data
+
+		obj = pickle.loads(all_data)
+		conn.close()
+		break
+	hpE = obj[0]
+	defE = obj[1]
+	atkE = obj[2]
+	while True:
+		print("------------")
+		print("My hp: " + str(hp))
+		print("My defense: " + str(defense))
+		print("My atk: " + str(atk))
+		print("------------")
+		print("Enemy hp: " + str(hpE))
+		print("Defense enemy: " + str(defE))
+		print("Atk enemy: " + str(atkE))
+		print("------------")
+		dmg = atk - random.randrange(0, defE)
+		if dmg < 1:
+			dmg = 0
+		hpE -= dmg
+		dmg = atkE - random.randrange(0, defense)
+		if dmg < 1:
+			dmg = 0
+		hp -= dmg
+		if hpE < 1:
+			print("     You win!!!")
+			input()
+			money += 100
+			hp = maxhp
+			break
+		if hp < 1:
+			print("You lose")
+			hp = maxhp
+			break
+	input()
+	menu()
+def client():
+	print("Enter ip")
+	ip = input()
+	sock.connect((ip, 9090))
+	obj = [hp, defense, atk, hpE]
+	data = pickle.dumps(obj)
+	sock.sendall(data)
+	sock.close()
+
 def menu():
 	global plDeck, showItems, autosave, hp, maxhp, defense, atk, xp, lvl, money, waves, items, stones, shards
 	print("1. Load save")
 	print("2. New game")
 	print("3. Options")
 	print("4. Info about current world generation")
+	print("5. Multiplayer")
 	b = input()
 	if(b == ""):
 		menu()
@@ -579,6 +647,14 @@ def menu():
 				print("City one at " + str(z) + " chunk")
 			elif(int(infoChunk[z]) == 4):
 				print("City two at " + str(z) + " chunk")
+	elif(int(b) == 5):
+		print("1) Create server")
+		print("2) Connect")
+		b = input()
+		if(int(b) == 1):
+			server()
+		elif(int(b) == 2):
+			client()
 	else:
 		menu()
 	menu()
