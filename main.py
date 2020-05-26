@@ -478,7 +478,7 @@ def attackMob(num, isdung):
 		dung(items, mobsInChank)
 
 def server():
-	global hp, defense, atk
+	global hp, defense, atk, money
 	sock.bind(('', 9090))
 	sock.listen(1)
 
@@ -491,7 +491,6 @@ def server():
 				data = conn.recv(BUFFER_SIZE)
 				if not data:
 					break
-				print('Recv: {}: {}'.format(len(data), data))
 				all_data += data
 
 		obj = pickle.loads(all_data)
@@ -534,7 +533,7 @@ def client():
 	print("Enter ip")
 	ip = input()
 	sock.connect((ip, 9090))
-	obj = [hp, defense, atk, hpE]
+	obj = [hp, defense, atk]
 	data = pickle.dumps(obj)
 	sock.sendall(data)
 	sock.close()
@@ -845,6 +844,7 @@ def main():
 				save()
 				quit()
 			if(int(b) == 0):
+				save()
 				menu()
 			if(int(b) == 1):
 				print("Enter number of monster: ")
